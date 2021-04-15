@@ -1,4 +1,4 @@
-# Plasmic workflow v2
+# Plasmic workflow v3
 name: Sync, build and deploy Plasmic app
 
 on:
@@ -11,24 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: checkout
-        name: Checkout repository
+        name: Checking out repository...
         uses: actions/checkout@v2
         with:
           persist-credentials: false
           fetch-depth: 0
       - id: node
-        name: Setup node v14
+        name: Setting up node v14...
         uses: actions/setup-node@v2
         with:
           node-version: "14"
       - id: cache
-        name: Cache node_modules
+        name: Recovering cache...
         uses: actions/cache@v2
         with:
           key: lock-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
           path: ${{ github.event.client_payload.data.directory }}/node_modules
       - id: init
-        name: Initialize Plasmic app
+        name: Initializing Plasmic app...
         uses: plasmicapp/plasmic-action@master
         with:
           run: init
@@ -43,7 +43,7 @@ jobs:
           title: ${{ github.event.client_payload.data.title }}
           description: ${{ github.event.client_payload.data.description }}
       - id: sync
-        name: Sync Plasmic project
+        name: Syncing Plasmic project...
         if: ${{ github.event.client_payload.data.scheme == 'codegen' && steps.init.outputs.synced != 'true' }}
         uses: plasmicapp/plasmic-action@master
         with:
@@ -57,7 +57,7 @@ jobs:
           title: ${{ github.event.client_payload.data.title }}
           description: ${{ github.event.client_payload.data.description }}
       - id: build
-        name: Build Plasmic app
+        name: Building Plasmic app...
         if: ${{ github.event.client_payload.data.publish }}
         uses: plasmicapp/plasmic-action@master
         with:
@@ -66,14 +66,14 @@ jobs:
           directory: ${{ github.event.client_payload.data.directory }}
           platform: ${{ github.event.client_payload.data.platform }}
       - id: gh-pages
-        name: Publish to GitHub Pages
+        name: Publishing to GitHub Pages...
         uses: JamesIves/github-pages-deploy-action@4.1.0
         if: ${{ steps.build.outputs.publish_dir }}
         with:
           branch: gh-pages
           folder: ${{ steps.build.outputs.publish_dir }}
       - id: pr
-        name: Create pull request
+        name: Creating pull request...
         uses: repo-sync/pull-request@v2
         if: ${{ steps.sync.outputs.new_branch }}
         with:
